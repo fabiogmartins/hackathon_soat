@@ -345,7 +345,7 @@ A comunicação entre os microsserviços será feita através do API Gateway par
 
 A infraestrutura será demonstrada com a aplicação funcionando em um ambiente AWS, incluindo exemplos reais de chamadas de API.
 
-### Demonstração do MVP
+### Possível demonstração do MVP
 
 A aplicação MVP incluirá as seguintes funcionalidades:
 
@@ -367,7 +367,7 @@ A aplicação MVP incluirá as seguintes funcionalidades:
 6. **Agendamento de Consultas (Paciente)**
    - Endpoint para agendamento de consultas com visualização de agenda.
 
-## Avaliação
+## Requisitos 
 
 1. **Melhores Práticas de Qualidade e Arquitetura de Software**
    - Princípios SOLID e Clean Code.
@@ -386,6 +386,4 @@ A aplicação MVP incluirá as seguintes funcionalidades:
 
 ## Conclusão
 
-A arquitetura proposta para o sistema de tele
-
-medicina da Health&Med é robusta, escalável e segura, utilizando as melhores práticas de desenvolvimento de software e infraestrutura. Com uma abordagem de microsserviços, AWS como provedor de infraestrutura e automação completa via Terraform e CI/CD, a Health&Med estará preparada para oferecer um serviço de alta qualidade e confiabilidade para seus usuários.
+A arquitetura proposta para o sistema de telemedicina da Health&Med é robusta, escalável e segura, utilizando as melhores práticas de desenvolvimento de software e infraestrutura. Com uma abordagem de microsserviços, AWS como provedor de infraestrutura e automação completa via Terraform e CI/CD, a Health&Med estará preparada para oferecer um serviço de alta qualidade e confiabilidade para seus usuários.
