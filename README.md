@@ -48,40 +48,7 @@ A Health&Med está desenvolvendo um sistema proprietário para telemedicina, sub
 
 ### Diagrama da Arquitetura
 
-```plaintext
-                +---------------------+
-                |      Frontend       |
-                +---------------------+
-                          |
-                          v
-                +---------------------+
-                |    API Gateway      |
-                +---------------------+
-                          |
-+-----------+---------+---------+-----------+
-|           |         |         |           |
-v           v         v         v           v
-+-----------+---------+---------+-----------+
-|  Auth     |  Medico |  Paciente |  Consulta  |  Prontuario  |
-| Service   | Service | Service |  Service  |  Service  |
-+-----------+---------+---------+-----------+
-      |           |         |         |           |
-      v           v         v         v           v
-+-----------+---------+---------+-----------+
-|          Database Services                |
-|   (RDS, DynamoDB, S3)                     |
-+-------------------------------------------+
-                          |
-                          v
-                +---------------------+
-                |       S3 Bucket     |
-                +---------------------+
-                          |
-                          v
-                +---------------------+
-                |     CloudFront      |
-                +---------------------+
-```
+![](AWS.png)
 
 ### Descrição dos Componentes
 
