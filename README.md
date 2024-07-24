@@ -1,5 +1,58 @@
 # Proposta de Arquitetura de Software para o Sistema de Telemedicina da Health&Med
 
+## Índice
+- [Visão Geral](#visão-geral)
+- [Requisitos Funcionais](#requisitos-funcionais)
+  - [Autenticação do Usuário (Médico)](#autenticação-do-usuário-médico)
+  - [Cadastro/Edição de Horários Disponíveis (Médico)](#cadastroedição-de-horários-disponíveis-médico)
+  - [Aceite ou Recusa de Consultas Médicas (Médico)](#aceite-ou-recusa-de-consultas-médicas-médico)
+  - [Autenticação do Usuário (Paciente)](#autenticação-do-usuário-paciente)
+  - [Busca por Médicos (Paciente)](#busca-por-médicos-paciente)
+  - [Agendamento de Consultas (Paciente)](#agendamento-de-consultas-paciente)
+  - [Teleconsulta](#teleconsulta)
+  - [Prontuário Eletrônico](#prontuário-eletrônico)
+- [Requisitos Não Funcionais](#requisitos-não-funcionais)
+  - [Alta Disponibilidade](#alta-disponibilidade)
+  - [Escalabilidade](#escalabilidade)
+  - [Segurança](#segurança)
+- [Arquitetura da Solução](#arquitetura-da-solução)
+  - [Diagrama da Arquitetura](#diagrama-da-arquitetura)
+  - [Descrição dos Componentes](#descrição-dos-componentes)
+    - [Frontend](#frontend)
+    - [API Gateway](#api-gateway)
+    - [Microsserviços](#microsserviços)
+      - [Auth Service](#auth-service)
+      - [Medico Service](#medico-service)
+      - [Paciente Service](#paciente-service)
+      - [Consulta Service](#consulta-service)
+      - [Prontuario Service](#prontuario-service)
+  - [Comunicação entre Microsserviços](#comunicação-entre-microsserviços)
+- [Database Services](#database-services)
+  - [Amazon RDS](#amazon-rds)
+  - [Amazon DynamoDB](#amazon-dynamodb)
+  - [Amazon S3](#amazon-s3)
+- [CloudFront](#cloudfront)
+- [Segurança](#segurança)
+  - [Criptografia](#criptografia)
+  - [Gerenciamento de Identidade e Acesso (IAM)](#gerenciamento-de-identidade-e-acesso-iam)
+  - [Monitoramento e Logs](#monitoramento-e-logs)
+- [Escalabilidade e Alta Disponibilidade](#escalabilidade-e-alta-disponibilidade)
+  - [Auto Scaling](#auto-scaling)
+  - [RDS Multi-AZ](#rds-multi-az)
+  - [S3 e CloudFront](#s3-e-cloudfront)
+- [Infraestrutura como Código (IaC) com Terraform](#infraestrutura-como-código-iac-com-terraform)
+  - [Diagrama da Infraestrutura com Terraform](#diagrama-da-infraestrutura-com-terraform)
+  - [Descrição do Fluxo de Infraestrutura com Terraform](#descrição-do-fluxo-de-infraestrutura-com-terraform)
+  - [Diagrama de Automação de CI/CD](#diagrama-de-automação-de-cicd)
+  - [Descrição do Fluxo de Automação de CI/CD](#descrição-do-fluxo-de-automação-de-cicd)
+- [Requisitos](#requisitos)
+  - [Melhores Práticas de Qualidade e Arquitetura de Software](#melhores-práticas-de-qualidade-e-arquitetura-de-software)
+  - [Práticas de Desenvolvimento Seguro](#práticas-de-desenvolvimento-seguro)
+  - [Documentação Abrangente](#documentação-abrangente)
+  - [Automatização da Infraestrutura](#automatização-da-infraestrutura)
+- [Conclusão](#conclusão)
+
+
 ## Visão Geral
 
 A Health&Med está desenvolvendo um sistema proprietário para telemedicina, substituindo soluções terceirizadas, visando maior qualidade, segurança dos dados dos pacientes e redução de custos. Este documento detalha a arquitetura do software com foco em arquitetos de software e desenvolvedores, fornecendo uma visão técnica abrangente para facilitar a implementação pelo time de desenvolvimento. O backend será implementado em .NET devido à familiaridade da equipe de desenvolvimento com essa tecnologia.
@@ -54,12 +107,9 @@ A Health&Med está desenvolvendo um sistema proprietário para telemedicina, sub
 
 #### Frontend
 
-- **Tecnologia**: React.js
 - **Funcionalidades**:
   - Interface responsiva para médicos e pacientes.
   - Integração com API Gateway para comunicação com os serviços backend.
-- **Justificativa**:
-  - React.js é uma biblioteca de frontend amplamente utilizada que permite a construção de interfaces de usuário interativas e dinâmicas. Sua popularidade e comunidade ativa garantem uma vasta gama de recursos e suporte.
 
 #### API Gateway
 
@@ -109,7 +159,7 @@ Os microsserviços serão implementados em .NET, cada um responsável por uma fu
   - Persistência de dados em Amazon RDS.
   - Comunicação com o Consulta Service para atualização de status de consultas.
 - **Justificativa**:
-  - .NET é uma plataforma robusta e madura para o desenvolvimento de aplicações backend. Sua integração com AWS, especialmente com serviços como RDS, facilita a criação de aplicações escaláveis e seguras.
+  - A escolha do Amazon RDS para o Medico Service é motivada pela necessidade de um banco de dados relacional robusto que assegure a consistência e integridade dos dados críticos dos médicos, tais como horários de disponibilidade e status das consultas. O Amazon RDS oferece alta disponibilidade com suporte Multi-AZ, garantindo a continuidade do serviço essencial para a operação contínua do sistema. Além disso, facilita a escalabilidade e o gerenciamento automatizado de backups, atualizações e patches de segurança, permitindo que a equipe de desenvolvimento se concentre em agregar valor ao negócio. A segurança avançada e o desempenho otimizado do RDS também são cruciais para proteger dados sensíveis e garantir uma experiência de usuário eficiente.
 
 #### Paciente Service
 
@@ -130,7 +180,7 @@ Os microsserviços serão implementados em .NET, cada um responsável por uma fu
   - Integração com serviços de terceiros para validação de CPF.
   - Comunicação com o Medico Service para busca de médicos e consulta de horários.
 - **Justificativa**:
-  - A escolha pelo .NET permite à equipe aproveitar seu conhecimento existente, reduzindo a curva de aprendizado e acelerando o desenvolvimento.
+  - A escolha do Amazon RDS para o Paciente Service é fundamentada pela necessidade de um banco de dados relacional confiável para gerenciar informações sensíveis dos pacientes, como dados pessoais, históricos médicos e agendamentos de consultas.
 
 #### Consulta Service
 
@@ -146,6 +196,7 @@ Os microsserviços serão implementados em .NET, cada um responsável por uma fu
   - Comunicação com Medico Service e Paciente Service para atualizações de status de consultas e links de reuniões.
 - **Justificativa**:
   - AWS Chime fornece uma solução completa para comunicações, permitindo a integração de funcionalidades de vídeo e voz em aplicações com facilidade.
+  - A escolha do Amazon DynamoDB para o Consulta Service é motivada pela necessidade de um banco de dados NoSQL altamente escalável e de baixa latência, ideal para armazenar e gerenciar dados dinâmicos e voláteis como links de reuniões online e status de consultas. DynamoDB oferece uma escalabilidade automática e gerenciamento de capacidade provisionada, permitindo que o sistema lide eficientemente com variações de carga e grandes volumes de dados, sem a necessidade de gerenciamento manual. Além disso, a alta disponibilidade e a durabilidade dos dados são garantidas pela replicação automática entre múltiplas regiões, assegurando que o serviço esteja sempre disponível. A integração com outros serviços da AWS e a facilidade de uso do DynamoDB permitem que a equipe de desenvolvimento se concentre em aprimorar funcionalidades de negócio, oferecendo uma experiência de usuário rápida e confiável.
 
 #### Prontuario Service
 
@@ -166,7 +217,7 @@ Os microsserviços serão implementados em .NET, cada um responsável por uma fu
   - Controle de acesso aos documentos via AWS S3 Policies.
   - Comunicação com Paciente Service para gerenciamento de documentos e compartilhamento.
 - **Justificativa**:
-  - Amazon S3 oferece armazenamento seguro, durável e escalável. Combinado com DynamoDB, que fornece baixa latência para metadados, garante uma solução eficiente para gerenciamento de prontuários eletrônicos.
+  - A escolha do Amazon S3 e do Amazon DynamoDB para o Prontuario Service é motivada pela necessidade de um armazenamento escalável, seguro e de alta disponibilidade para documentos médicos e metadados. O Amazon S3 é ideal para armazenar grandes volumes de documentos, como exames e laudos médicos, devido à sua alta durabilidade e escalabilidade, garantindo que os dados estejam sempre disponíveis e protegidos. Além disso, o S3 oferece criptografia de dados em repouso e controle de acesso granular, essenciais para a segurança dos dados sensíveis dos pacientes. O DynamoDB, por sua vez, é utilizado para armazenar os metadados dos documentos, proporcionando consultas rápidas e de baixa latência, o que é crucial para uma experiência de usuário eficiente. A combinação do S3 para armazenamento de arquivos e do DynamoDB para metadados permite uma gestão eficiente dos prontuários eletrônicos, atendendo às necessidades de segurança e performance do negócio.
 
 ### Comunicação entre Microsserviços
 
@@ -176,9 +227,7 @@ A comunicação entre os microsserviços será feita através do API Gateway par
    - Utilizado para comunicação entre o frontend e os microsserviços.
    - Também utilizado para chamadas públicas entre microsserviços, onde necessário.
 - **Justificativa**:
-  - API Gateway proporciona um ponto centralizado de gerenciamento e segurança para APIs, simplificando a comunicação
-
- entre componentes e garantindo uma gestão eficiente de autenticação e autorização.
+  - API Gateway proporciona um ponto centralizado de gerenciamento e segurança para APIs, simplificando a comunicação entre componentes e garantindo uma gestão eficiente de autenticação e autorização.
 
 2. **AWS App Mesh**:
    - Utilizado para comunicação interna entre microsserviços.
@@ -286,53 +335,179 @@ A comunicação entre os microsserviços será feita através do API Gateway par
 
 ### Infraestrutura como Código (IaC) com Terraform
 
-#### Provisionamento de Recursos
+Para implementar a infraestrutura da Health&Med utilizando Terraform, é essencial visualizar como os componentes serão configurados e interconectados. Abaixo está um diagrama que ilustra a infraestrutura e seus principais componentes provisionados com Terraform.
 
-- **VPC**: Configuração de VPC com subnets públicas e privadas, roteadores e gateways NAT.
-- **Security Groups**: Configuração de grupos de segurança para controlar o tráfego de rede.
-- **RDS**: Provisionamento de instância RDS Multi-AZ.
-- **DynamoDB**: Criação de tabelas DynamoDB.
-- **S3**: Criação de buckets S3 com políticas de acesso e criptografia.
-- **ECS Cluster**: Configuração de cluster ECS com tarefas e serviços definidos.
-- **API Gateway**: Configuração de API Gateway com rotas para os microsserviços.
-- **Lambda**: Criação de funções Lambda para tarefas event-driven.
-- **Justificativa**:
-  - Terraform permite o gerenciamento de infraestrutura como código, facilitando a automação, a consistência e a reprodutibilidade do ambiente de TI.
+#### Diagrama da Infraestrutura com Terraform
 
-#### Automação
+```plaintext
+                                +----------------------+
+                                |     AWS Account      |
+                                +----------------------+
+                                          |
+                                          v
+                  +------------------------------+          +---------------------+
+                  |      Terraform Configuration  |          |   Terraform State  |
+                  +------------------------------+          +---------------------+
+                                          |
+                                          v
+                              +------------------------+
+                              |        AWS VPC         |
+                              |        (10.0.0.0/16)   |
+                              +----------+-------------+
+                                         |
+            +------------+------------+------------+-------------+
+            |                         |                         |
+            v                         v                         v
+ +------------------+       +------------------+        +------------------+
+ | Public Subnet 1  |       | Public Subnet 2  |        | Public Subnet 3  |
+ |  (10.0.1.0/24)   |       |  (10.0.2.0/24)   |        |  (10.0.3.0/24)   |
+ +--------+---------+       +--------+---------+        +--------+---------+
+          |                          |                          |
+          v                          v                          v
+ +------------------+       +------------------+        +------------------+
+ |    NAT Gateway   |       | Application LB   |        |    NAT Gateway   |
+ +--------+---------+       +--------+---------+        +--------+---------+
+          |                          |                          |
+          |                          v                          |
+          |              +-----------------------+              |
+          |              |     ALB Listeners     |              |
+          |              +----------+------------+              |
+          |                         |                           |
+          v                         v                           v
+ +------------------+       +------------------+        +------------------+
+ | Private Subnet 1 |       | Private Subnet 2 |        | Private Subnet 3 |
+ |  (10.0.10.0/24)  |       |  (10.0.11.0/24)  |        |  (10.0.12.0/24)  |
+ +--------+---------+       +--------+---------+        +--------+---------+
+          |                          |                          |
+          v                          v                          v
+ +-------------------+     +-------------------+      +-------------------+
+ | ECS Service (1)   |     | ECS Service (2)   |      | ECS Service (3)   |
+ +--------+----------+     +--------+----------+      +--------+----------+
+          |                          |                          |
+          v                          v                          v
+ +-------------------+     +-------------------+      +-------------------+
+ |   RDS (Database)  |     |  DynamoDB Tables  |      |      S3 Buckets   |
+ +-------------------+     +-------------------+      +-------------------+
+                                          |
+                                          v
+                                +----------------------+
+                                |   CloudWatch Logs    |
+                                +----------------------+
+```
 
-- **Pipeline de CI/CD**:
-  - **CodePipeline**: Orquestração do fluxo de CI/CD.
-  - **CodeBuild**: Compilação e testes automatizados dos microsserviços.
-  - **CodeDeploy**: Deploy automatizado nos serviços ECS.
-- **Justificativa**:
-  - Pipelines de CI/CD garantem um fluxo de desenvolvimento eficiente e seguro, reduzindo o tempo de deploy e minimizando erros humanos.
+### Descrição do Fluxo de Infraestrutura com Terraform
 
-### Demonstração da Infraestrutura na Cloud
+1. **Terraform Configuration**:
+   - Os arquivos de configuração do Terraform definem todos os recursos a serem provisionados na AWS, incluindo VPC, subnets, gateways, ALB, ECS clusters, RDS, DynamoDB e S3.
+   - Utilização do Terraform State para manter o estado atual da infraestrutura provisionada.
 
-A infraestrutura será demonstrada com a aplicação funcionando em um ambiente AWS, incluindo exemplos reais de chamadas de API.
+2. **AWS VPC (10.0.0.0/16)**:
+   - Criação de uma VPC para isolar a rede da aplicação.
+   - Divisão da VPC em subnets públicas e privadas distribuídas em diferentes zonas de disponibilidade para alta disponibilidade.
 
-### Possível demonstração do MVP
+3. **Public Subnets**:
+   - **Subnets**: 10.0.1.0/24, 10.0.2.0/24, 10.0.3.0/24.
+   - **NAT Gateway**: Implantado em subnets públicas para permitir que instâncias em subnets privadas acessem a Internet sem serem expostas diretamente.
+   - **Application Load Balancer (ALB)**: Distribui o tráfego de entrada entre as instâncias de ECS nas subnets privadas.
 
-A aplicação MVP incluirá as seguintes funcionalidades:
+4. **Private Subnets**:
+   - **Subnets**: 10.0.10.0/24, 10.0.11.0/24, 10.0.12.0/24.
+   - **ECS Service**: Hospeda os microsserviços do sistema de telemedicina, escalando conforme necessário.
+   - **RDS**: Banco de dados relacional para armazenamento de dados estruturados.
+   - **DynamoDB**: Banco de dados NoSQL para armazenamento de metadados de documentos e dados de alta velocidade.
+   - **S3 Buckets**: Armazenamento de documentos médicos e outros arquivos grandes.
 
-1. **Autenticação do Usuário (Médico)**
-   - Login utilizando AWS Cognito.
+5. **Security Groups**:
+   - Definição de regras de segurança para controlar o tráfego de rede entre os componentes da infraestrutura.
 
-2. **Cadastro/Edição de Horários Disponíveis (Médico)**
-   - Endpoint para cadastro e edição de horários.
+6. **CloudWatch Logs**:
+   - Monitoramento e coleta de logs de todas as instâncias e serviços para auditoria, monitoramento de desempenho e solução de problemas.
 
-3. **Aceite ou Recusa de Consultas Médicas (Médico)**
-   - Endpoint para aceite/recusa de consultas.
 
-4. **Autenticação do Usuário (Paciente)**
-   - Login utilizando AWS Cognito.
 
-5. **Busca por Médicos (Paciente)**
-   - Endpoint para busca de médicos com filtros.
+### Diagrama de Automação de CI/CD
 
-6. **Agendamento de Consultas (Paciente)**
-   - Endpoint para agendamento de consultas com visualização de agenda.
+Para a implementação do pipeline de CI/CD (Continuous Integration and Continuous Deployment) com AWS CodePipeline, AWS CodeBuild e AWS CodeDeploy, abaixo está um diagrama ilustrando o fluxo completo desde o commit no Git até a implantação na infraestrutura de produção.
+
+#### Diagrama do Pipeline de CI/CD
+
+```plaintext
+              +------------------+
+              |    Desenvolvedor  |
+              +--------+---------+
+                       |
+                       v
+               +---------------+
+               |  Repositório  |
+               |    GitHub     |
+               +-------+-------+
+                       |
+                       v
+               +---------------+
+               | AWS CodePipeline|
+               +-------+-------+
+                       |
+                       v
+   +------------------+  +---------------------+
+   |  Fase de Build   |  |    Fase de Teste    |
+   | AWS CodeBuild    |  |   AWS CodeBuild     |
+   +------------------+  +---------------------+
+                       |             |
+                       v             v
+               +-------------------------+
+               |     Fase de Deploy      |
+               |   AWS CodeDeploy        |
+               +-----------+-------------+
+                           |
+                           v
+     +-------------+-------+-------+---------------+
+     |             |               |               |
++----------+  +----------+    +----------+    +----------+
+|  ECS Dev |  |  ECS QA  |    |  ECS Prod|    | CloudWatch|
++----------+  +----------+    +----------+    +-----------+
+```
+
+### Descrição do Fluxo de Automação de CI/CD
+
+1. **Desenvolvedor**:
+   - Faz commits de código no repositório GitHub.
+   - O código pode incluir novas funcionalidades, correções de bugs, ou melhorias.
+
+2. **GitHub Repositório**:
+   - Armazena o código-fonte do projeto.
+   - Configurado com webhooks para integrar com AWS CodePipeline.
+   - Qualquer mudança no repositório (commit, pull request) aciona o pipeline de CI/CD.
+
+3. **AWS CodePipeline**:
+   - Orquestra o fluxo completo de CI/CD.
+   - Configura diferentes estágios, incluindo build, teste e deploy.
+   - Garante que cada estágio é completado com sucesso antes de passar para o próximo.
+
+4. **Fase de Build (AWS CodeBuild)**:
+   - Compila o código e resolve dependências.
+   - Gera artefatos de build que serão utilizados nos estágios seguintes.
+   - Inclui configuração de scripts de build (por exemplo, buildspec.yml).
+
+5. **Fase de Teste (AWS CodeBuild)**:
+   - Executa testes automatizados (unitários, integração, etc.).
+   - Garante que o código atende aos critérios de qualidade antes de prosseguir.
+   - Relatórios de testes são gerados e armazenados.
+
+6. **Fase de Deploy (AWS CodeDeploy)**:
+   - Implanta os artefatos de build nas instâncias ECS.
+   - Pode incluir diferentes ambientes (Desenvolvimento, QA, Produção).
+   - Usa estratégias de implantação como rolling updates para minimizar downtime.
+
+7. **ECS (Elastic Container Service)**:
+   - **ECS Dev**: Ambiente de desenvolvimento para testes iniciais.
+   - **ECS QA**: Ambiente de qualidade para testes mais abrangentes.
+   - **ECS Prod**: Ambiente de produção onde o código final é implantado.
+
+8. **CloudWatch**:
+   - Monitora a saúde dos serviços e instâncias.
+   - Coleta logs e métricas para análise e alertas.
+
+
 
 ## Requisitos 
 
